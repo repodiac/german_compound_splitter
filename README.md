@@ -1,6 +1,6 @@
 # german_compound_splitter
 
-**german_compound_splitter** is a Python module to split up German compound words (for instance the famous *Donaudampfschifffahrtskapitänsmützenabzeichen*), based on given external German dictionary and a highly-efficient implementation of the [Aho–Corasick algorithm](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm), [pyahocorasick](https://pypi.org/project/pyahocorasick/) for multi-pattern string search and retrieval.
+**german_compound_splitter** is a Python module to split up German compound words (for instance the famous *Donaudampfschifffahrtskapitänsmützenabzeichen*), based on a given external German dictionary and a highly-efficient implementation of the [Aho–Corasick algorithm](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm), [pyahocorasick](https://pypi.org/project/pyahocorasick/), for multi-pattern string search and retrieval.
 
 The method works really well compared to the available other alternatives I know of for German compound splitting. Depending on your use case you may want normalized forms of the resulting components (split words), most likely the singular form. You can try `make_singular=True`, it works for me in most cases.
 
@@ -8,7 +8,9 @@ Sometimes the result has artifacts or some "simple" words have not been splitted
 Nonetheless, you can play around with the parameter `only_nouns=False` which allows for any type of word (verb, adjective, prefix, suffix) in the dictionary to be used for splitting. Sometimes the results are
 good or better than if limiting to nouns only.
 
-Also depending on the use case is the option to mark everything which is not found in the dictionary to be masked as "__unknown__" split word in the results. Otherwise and per default, the compound splitter tries to workaround these issues or simply copies the unknown part directly to the results. You can see that if you use with `only_nouns=True` and a split word is lower-case though. This is most likely an unknown part not found in the dictionary or interfering with other words from the dictionary. This is also true for words where you wonder why they haven't been split up appropriately. At the time of writing this README, some very basic words like "Zeit" or "Fahrt" are not in the dictionary (either by mistake of the author or for other reasons).
+Also depending on the use case is the option to mark everything which is not found in the dictionary to be masked as "__unknown__" split word in the results. Otherwise and per default, the compound splitter tries to workaround these issues or simply copies the unknown part directly to the results. You can see that if you use with `only_nouns=True` and a split word is lower-case though. This is most likely an unknown part not found in the dictionary or interfering with other words from the dictionary.
+
+This is also true for words where you wonder why they haven't been split up appropriately. At the time of writing this README, some very basic words like "Zeit" or "Fahrt" are not in the dictionary (either by mistake of the author or for other reasons).
 
 ## License and Attribution
 
@@ -16,7 +18,7 @@ This work is licensed under the Creative Commons Attribution 4.0 International L
 
 To provide **attribution or cite this work** please use the following text snippet:
 ```
-german_transliterate, Copyright 2020 by repodiac, see https://github.com/repodiac for updates and further information
+german_compound_splitter, Copyright 2020 by repodiac, see https://github.com/repodiac for updates and further information
 ```
 
 ## Version History
@@ -35,9 +37,11 @@ Setup:
 - It should install and behave (`import german_compound_splitter`) to your current Python environment as any other `pip` package (in case, create a virtual environment with `virtualenv` or `conda` before).
 - Afaik, any updates (`git pull`) are automatically active -- as opposed to an ordinary, external pip package -- since pip only installs a link to the file(s) in the git repo
 
-## Notes on External Dictionary
+## Some Notes on an External Dictionary
 
-Due to unclear license and depending on the kind of use (private, research, commercial, ...) I cannot include a dictionary here in this setting. I recommend the [free German dictionary](https://sourceforge.net/projects/germandict/files/latest/download) from @janschreiber, though. It is constantly updated and includes more than 2 million entries currently!
+Due to unclear license and depending on the kind of use (private, research, commercial, ...) I cannot include a dictionary here in this setting. I strongly recommend the [Free German Dictionary](https://sourceforge.net/projects/germandict/files/latest/download) by [Jan Schreiber](https://github.com/janschreiber), though. It is constantly updated and includes currently more than 2 million entries! But apart from this, you can use any dictionary containing one item per line.
+
+**Note:** The *Free German Dictionary* needs to be saved as UTF8 and with Unix/Linux line breaks before it can be used with Python, otherwise loading gives byte errors (at least on my machine)
 
 # Documentation
 
