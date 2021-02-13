@@ -245,20 +245,21 @@ def dissect(compound, ahocs, only_nouns=True, make_singular=False, mask_unknown=
     # is a valid entry in the dictionary
     if only_nouns:
         for ri in range(len(results) - 1):
-            if results[ri].islower():
-                merged = results[ri] + results[ri + 1].lower()
-                if ahocs.exists(merged):
-                    part1 = results[ri]
-                    part2 = results[ri + 1]
-                    results.insert(ri, merged[0].upper() + merged[1:])
-                    results.remove(part1)
-                    results.remove(part2)
-                else:
-                    # workaround for single letters (most likely artifacts)
-                    if len(results[ri]) == 1:
-                        aritfact_single_letter = results[ri]
-                        results[ri-1] += aritfact_single_letter
-                        results.remove(aritfact_single_letter)
+            if ri < len(results):
+                if results[ri].islower():
+                    merged = results[ri] + results[ri + 1].lower()
+                    if ahocs.exists(merged):
+                        part1 = results[ri]
+                        part2 = results[ri + 1]
+                        results.insert(ri, merged[0].upper() + merged[1:])
+                        results.remove(part1)
+                        results.remove(part2)
+                    else:
+                        # workaround for single letters (most likely artifacts)
+                        if len(results[ri]) == 1:
+                            aritfact_single_letter = results[ri]
+                            results[ri-1] += aritfact_single_letter
+                            results.remove(aritfact_single_letter)
 
     # if set, compute singular version of each split word
     if make_singular:
