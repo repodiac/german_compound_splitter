@@ -23,6 +23,7 @@ german_compound_splitter, Copyright 2020 by repodiac, see https://github.com/rep
 
 ## Version History
 
+* `release 0.1.1` - fixed issue #1 (thank you for pointing out, @sebag90) and added some improvements for handling plural
 * `release 0.1` - initial release of the software, please let me know about bugs or issues
 
 # Installation/Setup
