@@ -128,11 +128,11 @@ def compute_singular(item, ahocs):
     :param ahocs: the data structure holding an efficient representation of the dictionary
     :return: transformed singular form of item
     """
-    for suf in PLURAL_SUFFIX:
+    for suf in sorted(PLURAL_SUFFIX, reverse=True):
         # check for matching suffix
         if item.endswith(suf):
             item_singular = item[:len(item) - len(suf)]
-            if item_singular.lower() in ahocs:
+            if item_singular.lower() in ahocs and ahocs.get(item_singular.lower())[0]:
                 return item_singular
             # alternatively check for "umlauts" and convey to base vowels, in case
             else:
@@ -165,7 +165,7 @@ def dissect(compound, ahocs, only_nouns=True, make_singular=False, mask_unknown=
 
     # iterates over all found substrings in compound word, provides end index and substring itself
     for end, val in ahocs.iter(compound.lower()):
-        # skip if abbreviation or if not a noun in case falg only_nouns is set
+        # skip if abbreviation or if not a noun in case only_nouns is set (val[0] is False if first letter is lowercase)
         if _is_abbreviation(val) or (only_nouns and not val[0]):
             continue
 
@@ -193,7 +193,7 @@ def dissect(compound, ahocs, only_nouns=True, make_singular=False, mask_unknown=
     # end position for unknown parts of the compound which cannot be found in or via the dictionary
     lost_end_pos = -1
     # make sure you cover the full tail of the compound, in case the last part is unknown
-    if max_end_pos < len(compound):
+    if (max_end_pos+1) < len(compound):
         lost_end_pos = len(compound)
 
     # loop over the compound from the end to the start (reverse order)
@@ -219,7 +219,7 @@ def dissect(compound, ahocs, only_nouns=True, make_singular=False, mask_unknown=
                 # valid split found, but may have plural form of split word
                 elif (start_compound - 2) in matches and _check_if_suffix(compound[start_compound - 1:]):
                     end_next = start_compound - 2
-                # invariant: end of string (arrived at start of compound, pos=0)
+                # invariant: end of string (reached start of compound, pos=0)
                 elif start_compound == 0:
                     end_next = 0
 
@@ -244,6 +244,8 @@ def dissect(compound, ahocs, only_nouns=True, make_singular=False, mask_unknown=
     # post-corrections, e.g. merge invalid splits if split and succeeding split word merged
     # is a valid entry in the dictionary
     if only_nouns:
+        # workaround to prevent unwanted behaviour (only nouns are eligible)
+        results[0] = results[0][0].upper() + results[0][1:]
         for ri in range(len(results) - 1):
             if results[ri].islower():
                 merged = results[ri] + results[ri + 1].lower()
