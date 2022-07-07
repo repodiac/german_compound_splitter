@@ -38,9 +38,13 @@ Setup:
 
 ## Some Notes on an External Dictionary
 
-Due to unclear license and depending on the kind of use (private, research, commercial, ...) I cannot include a dictionary here in this setting. I strongly recommend the [Free German Dictionary](https://sourceforge.net/projects/germandict/files/latest/download) by [Jan Schreiber](https://github.com/janschreiber), though. It is constantly updated and includes currently more than 2 million entries! But apart from this, you can use any dictionary containing one item per line.
+Due to unclear license and depending on the kind of use (private, research, commercial, ...) I cannot include a dictionary here in this setting. I strongly recommend the [Free German Dictionary](https://sourceforge.net/projects/germandict/files/latest/download) by [Jan Schreiber](https://github.com/janschreiber), though. It is constantly or often updated and includes currently more than 2.1 million entries! But apart from this, you can use any dictionary containing one item per line.
 
-**Note:** The *Free German Dictionary* needs to be saved as UTF8 and with Unix/Linux line breaks before it can be used with Python, otherwise loading gives byte errors (at least on my machine)
+**Note:**
+* The *Free German Dictionary* needs to be saved as UTF8 and with Unix/Linux line breaks before it can be used with Python, otherwise loading gives byte errors (at least on my machine)
+
+* A useful tool available on "linux-ish" operating systems proved to be very useful here:
+`iconv -f ISO_8859-15 german.dic > german_utf8_linux.dic` saves the dictionary to a version (`german_utf8_linux.dic`) readable py Python
 
 # Documentation
 
