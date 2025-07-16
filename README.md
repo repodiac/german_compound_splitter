@@ -23,14 +23,17 @@ german_compound_splitter, Copyright 2020 by repodiac, see https://github.com/rep
 
 ## Version History
 
-* `release 0.1.1` - fixed issue #1 (thank you for pointing out, @sebag90) and added some improvements for handling plural
-* `release 0.1` - initial release of the software, please let me know about bugs or issues
+* `release 0.1.2` - fixed issue #3 (thank you for the code snippet, [@emphasize](https://github.com/emphasize))
+* `release 0.1.1` - fixed issue #1 (thank you for pointing out, [@sebag90](https://github.com/sebag90)) and added some improvements for handling plural
+* `release 0.1.0` - initial release of the software, please let me know about bugs or issues
 
 # Installation/Setup
 
 Installation is easy using `pip` and built-in `git` package installation based on `setup.py`:
 
-* `pip install git+https://github.com/repodiac/german_compound_splitter`
+* ```bash
+  pip install git+https://github.com/repodiac/german_compound_splitter
+  ```
 
 Setup:
 
@@ -40,25 +43,19 @@ Setup:
 
 Due to unclear license and depending on the kind of use (private, research, commercial, ...) I cannot include a dictionary here in this setting. I strongly recommend the [Free German Dictionary](https://sourceforge.net/projects/germandict/files/latest/download) by [Jan Schreiber](https://github.com/janschreiber), though. It is constantly or often updated and includes currently more than 2.1 million entries! But apart from this, you can use any dictionary containing one item per line.
 
-**Note:**
-* The *Free German Dictionary* needs to be saved as UTF8 and with Unix/Linux line breaks before it can be used with Python, otherwise loading gives byte errors (at least on my machine)
-
-* A useful tool available on "linux-ish" operating systems proved to be very useful here:
-`iconv -f ISO_8859-15 german.dic > german_utf8_linux.dic` saves the dictionary to a version (`german_utf8_linux.dic`) readable py Python
-
 # Documentation
 
 ## Example Usage
 
 In Python code or as library:
 
-```
+```py
 from german_compound_splitter import comp_split
 
 compound = 'Donaudampfschifffahrtskapitänsmützenabzeichen'
 # please load an appropriate (external) dictionary, see the notes in section Installation/Setup on the dictionary
 input_file = 'german.dic'
-ahocs = comp_split.read_dictionary_from_file(input_file)
+ahocs = comp_split.read_dictionary_from_file(input_file, encoding='iso-8859-15')
 
 dissection = comp_split.dissect(compound, ahocs, make_singular=True)
 print('SPLIT WORDS (plain):', dissection)
@@ -71,9 +68,11 @@ The main method to be used is `dissect('Kompositumszerlegungsmaschinerie', ahocs
 
 It has the following input parameters:
 
-* `only_nouns` - if `True` (default), return only recognized nouns, no pre- or suffixes and no verbs or adjectives
-* `make_singular` - if `True`, compute simple approach to extract singular form for each split word, default is `False`
-* `mask_unknown` - if `True`, mask each part which is unknown from the dictionary, if `False (default) the method tries to insert it anyway as lower-case; often this is still valid, but can come with artifacts sometimes
+| name           | default | description |
+| -------------- | ------- | ----------- |
+| `only_nouns`   | `True`  | return only recognized nouns, no pre- or suffixes and no verbs or adjectives |
+| `make_singuar` | `False` | compute simple approach to extract singular form for each split |
+| `mask_unknown` | `False` | mask each part which is unknown from the dictionary, if `False`, the method tries to insert it anyway as lower-case; often this is still valid, but can come with artifacts sometimes |
 
 ## Performance
 

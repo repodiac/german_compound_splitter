@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
    name='german_compound_splitter',
-   version='0.1.0',
+   version='0.1.2',
    author='repodiac',
    author_email='spamornot@gmx.net',
    packages=['german_compound_splitter'],
