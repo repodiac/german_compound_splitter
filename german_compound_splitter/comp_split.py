@@ -6,6 +6,11 @@
 # Copyright 2020 by repodiac (see https://github.com/repodiac, also for information how to provide attribution to this work)
 #
 
+from typing import List
+import locale
+import os
+import subprocess
+
 import ahocorasick
 
 # selection of common prefixes
@@ -22,18 +27,75 @@ MERGE_RIGHT = ['ff', 'au', 'ei', 'ung', 'ion', 'um',
 
 PLURAL_SUFFIX = ['en', 'er', 'e', 'n', 's']
 
+
+def _validate_locales(locales: List[str]) -> None:
+    saved = locale.setlocale(locale.LC_CTYPE)
+    try:
+        for name in locales:
+            try:
+                locale.setlocale(locale.LC_CTYPE, name)
+            except locale.Error:
+                raise ValueError(f"Locale '{name}' is not installed") from None
+    finally:
+        locale.setlocale(locale.LC_CTYPE, saved)
+
+
+def _validate_iconv_locales(locales: List[str]) -> None:
+    for name in locales:
+        env = os.environ.copy()
+        env['LC_ALL'] = name
+        result = subprocess.run(
+            ['iconv', '-f', 'UTF-8', '-t', 'ASCII//TRANSLIT'],
+            input='ä',
+            capture_output=True,
+            check=True,
+            encoding='utf-8',
+            env=env,
+        )
+        if '?' in result.stdout:
+            raise ValueError("Locale '{}' does not support iconv transliteration".format(name))
+
+
+def _transliterate_words(words: List[str], locale: str) -> List[str]:
+    env = os.environ.copy()
+    env['LC_ALL'] = locale
+    result = subprocess.run(
+        ['iconv', '-f', 'UTF-8', '-t', 'ASCII//TRANSLIT'],
+        input='\n'.join(words),
+        capture_output=True,
+        check=True,
+        encoding='utf-8',
+        env=env,
+    )
+    if result.stderr:
+        raise RuntimeError('iconv transliteration failed: ' + result.stderr.strip())
+    transliterated = result.stdout.splitlines()
+    if len(transliterated) != len(words):
+        raise RuntimeError('iconv returned an unexpected number of transliterated words')
+    return transliterated
+
 PLURAL_TRANSITION_VOWEL = {'ä': 'a',
                            'ü': 'u',
                            'ö': 'o'}
 
 
-def read_dictionary_from_file(input_file):
+def read_dictionary_from_file(input_file, transliteration_locales=None):
     """
     Load dictionary from file into efficient data structures for efficient search and retrieval
 
     :param input_file: a text file dictonary holding one item per line
+    :param transliteration_locales: optional locale name accepted by libc (e.g. 'de_DE') or list of locale names
+        (e.g. ['de_DE', 'en_US']);
+        if given, transliterated keys are additionally registered for dictionary entries, so that transliterated
+        compounds can be split using iconv; each locale must be installed on the host; default None: no transliteration
     :return: ahocorasick.Automaton, data structure for efficient search and retrieval
     """
+    if transliteration_locales:
+        if isinstance(transliteration_locales, str):
+            transliteration_locales = [transliteration_locales]
+        _validate_locales(transliteration_locales)
+        _validate_iconv_locales(transliteration_locales)
+
     # initialize the efficient data structures
     A = ahocorasick.Automaton()
 
@@ -48,7 +110,21 @@ def read_dictionary_from_file(input_file):
             continue
         # add key as lower-case in order to be able to compare it with any substring in a compound word
         # use the item (i.e. word) and if it's upper case as sort of flag (item can be regarded as noun then)
-        A.add_word(w.lower(), (w[0].isupper(), w))
+        # the third value is the length of the key, needed to compute start positions of matches
+        key = w.lower()
+        A.add_word(key, (w[0].isupper(), w, len(key)))
+
+    # additionally register transliterated keys, they map to the original dictionary word;
+    # real dictionary entries are never overridden
+    if transliteration_locales:
+        words = [w for w in input_list if w]
+        for loc in transliteration_locales:
+            transliterations = _transliterate_words(words, loc)
+            for w, translit in zip(words, transliterations):
+                key = w.lower()
+                translit = translit.lower()
+                if translit != key and translit not in A:
+                    A.add_word(translit, (w[0].isupper(), w, len(translit)))
 
     # generate with data
     A.make_automaton()
@@ -170,7 +246,7 @@ def dissect(compound, ahocs, only_nouns=True, make_singular=False, mask_unknown=
             continue
 
         # store each substring having the same end index in the same list but with its own start index attached
-        start = end + 1 - len(val[1])
+        start = end + 1 - val[2]
         if end not in matches:
             matches[end] = []
         matches[end].append((start, val))
